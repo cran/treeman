@@ -4,14 +4,21 @@
 \alias{writeTree}
 \title{Write a Newick tree}
 \usage{
-writeTree(tree, file, ndLabels = function(nd) {     return(NULL) })
+writeTree(tree, file, append = FALSE, ndLabels = function(nd) {    
+  return(NULL) }, parallel = FALSE, progress = "none")
 }
 \arguments{
 \item{tree}{\code{TreeMan} object}
 
 \item{file}{file path}
 
+\item{append}{T/F append tree to already existing file}
+
 \item{ndLabels}{node label function}
+
+\item{parallel}{logical, make parallel?}
+
+\item{progress}{name of the progress bar to use, see \code{\link{create_progress_bar}}}
 }
 \description{
 Creates a Newick tree from a \code{TreeMan} object.
@@ -27,10 +34,12 @@ tree <- randTree(10)
 ndLabels <- function(n) {
 paste0(n[['id']], '_ndlabel')
 }
-writeTree(tree, file='example.tre', ndLabels)
+writeTree(tree, file='example.tre', ndLabels=ndLabels)
 file.remove('example.tre')
 }
 \seealso{
-\code{\link{readTree}}, \code{\link{randTree}}, \url{https://en.wikipedia.org/wiki/Newick_format}
+\url{https://en.wikipedia.org/wiki/Newick_format},
+\code{\link{readTree}}, \code{\link{randTree}},
+\code{\link{readTrmn}}, \code{\link{writeTrmn}},
+\code{\link{saveTreeMan}}, \code{\link{loadTreeMan}}
 }
-

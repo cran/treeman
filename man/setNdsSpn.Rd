@@ -4,7 +4,7 @@
 \alias{setNdsSpn}
 \title{Set the branch lengths of specific nodes}
 \usage{
-setNdsSpn(tree, ids, vals, ...)
+setNdsSpn(tree, ids, vals, parallel = FALSE, progress = "none")
 }
 \arguments{
 \item{tree}{\code{TreeMan} object}
@@ -13,10 +13,12 @@ setNdsSpn(tree, ids, vals, ...)
 
 \item{vals}{new spans}
 
-\item{...}{\code{plyr} arguments}
+\item{parallel}{logical, make parallel?}
+
+\item{progress}{name of the progress bar to use, see \code{\link{create_progress_bar}}}
 }
 \description{
-Return a tree with the span of a node altered.
+Return a tree with the spans of nodes altered.
 }
 \details{
 Runs \code{setNdSpn} over multiple nodes. Parallelizable.
@@ -26,9 +28,12 @@ library(treeman)
 tree <- randTree(10)
 # make tree taxonomic
 tree <- setNdsSpn(tree, ids=tree['all'], vals=1)
+summary(tree)
+# remove spns by setting all to 0
+tree <- setNdsSpn(tree, ids=tree['all'], vals=0)
+summary(tree)
 }
 \seealso{
 \code{\link{setNdSpn}}
 \url{https://github.com/DomBennett/treeman/wiki/set-methods}
 }
-

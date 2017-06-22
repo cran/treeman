@@ -4,42 +4,50 @@
 \alias{addTip}
 \title{Add tip to a tree}
 \usage{
-addTip(tree, tid, sid, start, end, pid = paste0("p_", tid))
+addTip(tree, tid, sid, strt_age = NULL, end_age = 0, tree_age = NULL,
+  pid = paste0("p_", tid))
 }
 \arguments{
 \item{tree}{\code{TreeMan} object}
 
 \item{tid}{tip ID}
 
-\item{sid}{ID of node that will become new tip's sister}
+\item{sid}{ID of node that will become new tip sisters}
 
-\item{start}{start time}
+\item{strt_age}{timepoint at which new tips first appear in the tree}
 
-\item{end}{end time}
+\item{end_age}{timepoint at which new tips end appear in the tree, default 0.}
+
+\item{tree_age}{age of tree}
 
 \item{pid}{parent ID (default is 'p_' + tid)}
 }
 \description{
-Returns a tree with a tip ID added
+Returns a tree with a new tip ID added
 }
 \details{
-User must provide a new tip ID, the ID of a node
-which will become the new tip's sister, a start time point to
-specify when the new branch will start in time and, an end time point
-(0 for extant tips).
+User must provide new tip ID, the ID of the node
+which will become the new tip's sister, and new branch lengths.
+The tip ID must only contain letters numbers and underscores.
+Optionally, user can specify the IDs for the new parental internal nodes.
+Ensure that the \code{strt_age} is greater than the \code{end_age}, and that
+the \code{strt_age} falls within the age span of the sister ID. Otherwise, negative
+spns may be produced leading to an error.
+Note, returned tree will not have a node matrix.
+Note, providing negative end ages will increase the age of the tree.
 }
 \examples{
 library(treeman)
 tree <- randTree(10)
-# add a new tip to the branch preceding t1
-# calculate the span and find a point in that time frame for start
-t1_spn <- getSpnAge(tree, 't1')
-start <- runif(max=t1_spn[1, 'start'], min=t1_spn[1, 'end'], n=1)
-end <- runif(max=start, min=0, n=1)
-tree <- addTip(tree, tid='t11', sid='t1', start=start, end=end)
+tree_age <- getAge(tree)
+possible_ages <- getSpnAge(tree, 't1', tree_age)
+start_age <- runif(1, possible_ages[['end']], possible_ages[['start']])
+end_age <- possible_ages[['end']]
+tree <- addTip(tree, tid='t11', sid='t1', strt_age=start_age,
+end_age=end_age, tree_age=tree_age)
+summary(tree)
 }
 \seealso{
-\code{\link{rmTip}}, 
+\code{\link{rmTips}},
 \url{https://github.com/DomBennett/treeman/wiki/manip-methods}
 }
-

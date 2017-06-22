@@ -4,7 +4,7 @@
 \alias{setNdsOther}
 \title{Set a user defined slot for multiple nodes}
 \usage{
-setNdsOther(tree, ids, vals, slt_nm, ...)
+setNdsOther(tree, ids, vals, slt_nm, parallel = FALSE, progress = "none")
 }
 \arguments{
 \item{tree}{\code{TreeMan} object}
@@ -15,7 +15,9 @@ setNdsOther(tree, ids, vals, slt_nm, ...)
 
 \item{slt_nm}{slot name}
 
-\item{...}{\code{plyr} arguments}
+\item{parallel}{logical, make parallel?}
+
+\item{progress}{name of the progress bar to use, see \code{\link{create_progress_bar}}}
 }
 \description{
 Return a tree with a user defined slot for node IDs.
@@ -26,12 +28,14 @@ Runs \code{setNdOther()} over multiple nodes. Parellizable.
 \examples{
 library(treeman)
 tree <- randTree(10)
-vals <- sample(0:1, size=tree['nall'], replace=TRUE)
-tree <- setNdsOther(tree, tree['all'], vals, 'binary_val')
-(getNdsSlt(tree, ids=tree['all'], slt_nm='binary_val'))
+# e.g. confidences for nodes
+vals <- runif(min=0, max=1, n=tree['nall'])
+tree <- setNdsOther(tree, tree['all'], vals, 'confidence')
+tree <- updateSlts(tree)
+summary(tree)
+(getNdsSlt(tree, ids=tree['all'], slt_nm='confidence'))
 }
 \seealso{
 \code{\link{setNdOther}}
 \url{https://github.com/DomBennett/treeman/wiki/set-methods}
 }
-

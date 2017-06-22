@@ -4,26 +4,34 @@
 \alias{readTree}
 \title{Read a Newick tree}
 \usage{
-readTree(file = NULL, text = NULL, ...)
+readTree(file = NULL, text = NULL, wndmtrx = FALSE, parallel = FALSE,
+  progress = "none")
 }
 \arguments{
 \item{file}{file path}
 
 \item{text}{Newick character string}
 
-\item{...}{\code{plyr} arguments}
+\item{wndmtrx}{T/F add node matrix? Default FALSE.}
+
+\item{parallel}{logical, make parallel?}
+
+\item{progress}{name of the progress bar to use, see \code{\link{create_progress_bar}}}
 }
 \description{
 Return a \code{TreeMan} or \code{TreeMen} object from a Newick treefile
 }
 \details{
-Read a single or multiple trees from a file, or a text string. Parallelizable.
+Read a single or multiple trees from a file, or a text string. Parallelizable
+when reading multiple trees.
 }
 \examples{
 library(treeman)
 tree <- readTree(text="((A:1.0,B:1.0):1.0,(C:1.0,D:1.0):1.0);")
 }
 \seealso{
-\code{\link{writeTree}}, \code{\link{randTree}}, \url{https://en.wikipedia.org/wiki/Newick_format}
+\url{https://en.wikipedia.org/wiki/Newick_format},
+\code{\link{addNdmtrx}}, \code{\link{writeTree}},
+\code{\link{randTree}}, \code{\link{readTrmn}}, \code{\link{writeTrmn}},
+\code{\link{saveTreeMan}}, \code{\link{loadTreeMan}}
 }
-

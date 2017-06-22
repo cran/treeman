@@ -4,7 +4,7 @@
 \alias{setNdsID}
 \title{Set the IDs of multiple nodes}
 \usage{
-setNdsID(tree, ids, vals, ...)
+setNdsID(tree, ids, vals, parallel = FALSE, progress = "none")
 }
 \arguments{
 \item{tree}{\code{TreeMan} object}
@@ -13,23 +13,25 @@ setNdsID(tree, ids, vals, ...)
 
 \item{vals}{new ids}
 
-\item{...}{\code{plyr} arguments}
+\item{parallel}{logical, make parallel?}
+
+\item{progress}{name of the progress bar to use, see \code{\link{create_progress_bar}}}
 }
 \description{
 Return a tree with the IDs of nodes altered.
 }
 \details{
 Runs \code{setNdID()} over multiple nodes. Warning: all IDs must be unique,
-avoid spaces in IDs. Parellizable.
+avoid spaces in IDs, only use numbers, letters and underscores. Parellizable.
 }
 \examples{
 library(treeman)
 tree <- randTree(10)
 new_ids <- paste0('heffalump_', 1:tree['ntips'])
 tree <- setNdsID(tree, tree['tips'], new_ids)
+summary(tree)
 }
 \seealso{
 \code{\link{setNdID}}
 \url{https://github.com/DomBennett/treeman/wiki/set-methods}
 }
-

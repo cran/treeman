@@ -4,10 +4,14 @@
 \alias{randTree}
 \title{Generate a random tree}
 \usage{
-randTree(n)
+randTree(n, wndmtrx = FALSE, parallel = FALSE)
 }
 \arguments{
-\item{n}{number of tips, integer, must be greater than 1}
+\item{n}{number of tips, integer, must be 3 or greater}
+
+\item{wndmtrx}{T/F add node matrix? Default FALSE.}
+
+\item{parallel}{T/F run in parallel? Default FALSE.}
 }
 \description{
 Returns a random \code{TreeMan} tree with \code{n}
@@ -22,6 +26,6 @@ library(treeman)
 tree <- randTree(5)
 }
 \seealso{
-\code{\link{TreeMan-class}}
+\code{\link{TreeMan-class}}, \code{\link{blncdTree}},
+\code{\link{unblncdTree}}
 }
-

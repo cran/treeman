@@ -4,18 +4,18 @@
 \alias{pinTips}
 \title{Pin tips to a tree}
 \usage{
-pinTips(tree, tids, lngs, ends, ...)
+pinTips(tree, tids, lngs, end_ages, tree_age)
 }
 \arguments{
 \item{tree}{\code{TreeMan} object}
 
 \item{tids}{new tip ids}
 
-\item{lngs}{list of vectors of the lineages of each tid}
+\item{lngs}{list of vectors of the lineages of each tid (ordered high to low rank)}
 
-\item{ends}{end time points for each tid}
+\item{end_ages}{end time points for each tid}
 
-\item{...}{\code{plyr} arguments}
+\item{tree_age}{age of tree}
 }
 \description{
 Returns a tree with new tips added based on given lineages and time points
@@ -26,12 +26,12 @@ for these IDs (in ascending order) and a vector of end time points for each new 
 (0s for extant tips). The function expects the given tree to be taxonomically informed;
 the \code{txnym} slot for every node should have a taxonomic label. The function takes
 the lineage and tries to randomly add the new tip at the lowest point in the taxonomic rank
-before the end time point. Parallelizable.
+before the end time point. Note, returned tree will not have a node matrix.
 }
 \examples{
 # see https://github.com/DomBennett/treeman/wiki/Pinning-tips for a detailed example
 }
 \seealso{
+\code{\link{addTip}}, \code{\link{rmTips}},
 \url{https://github.com/DomBennett/treeman/wiki/manip-methods}
 }
-

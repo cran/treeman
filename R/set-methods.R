@@ -1,14 +1,42 @@
-# #TODO
-setNdTxnym <- function(...) {
-  cat('Sorry not yet implemented!\n')
-}
-
-setNdsTxnym <- function(...) {
-  cat('Sorry not yet implemented!\n')
-}
-
-setRoot <- function(...) {
-  cat('Sorry not yet implemented!\n')
+#' @name setTxnyms
+#' @title Set the txnym slots in a tree
+#' @description Return a tree with txnyms added to specified nodes
+#' @details Returns a tree. Specify the taxonomic groups for nodes in a tree
+#' by providing a vector or list named by node IDs. Takes output from \code{searchTxnyms}.
+#' Only letters, numbers and underscores allowed. To remove special characters use regular
+#' expressions, e.g. \code{gsub(['a-zA-Z0-9_'], '', txnym)}
+#' @param tree \code{TreeMan} object
+#' @param txnyms named vector or list
+#' @seealso
+#' \code{\link{taxaResolve}}, \code{\link{searchTxnyms}},
+#' \code{\link{getNdsLng}}, \code{\link{getNdLng}},
+#' \url{https://github.com/DomBennett/treeman/wiki/set-methods}
+#' @export
+#' @examples
+#' library(treeman)
+#' data(mammals)
+#' # let's change the txnym for humans
+#' # what's its summary before we change anything?
+#' summary(mammals[['Homo_sapiens']])
+#' # now let's add Hominini
+#' new_txnym <- list('Homo_sapiens'=c('Hominini', 'Homo'))
+#' mammals <- setTxnyms(mammals, new_txnym)
+#' summary(mammals[['Homo_sapiens']])
+setTxnyms <- function(tree, txnyms) {
+  .add <- function(nid) {
+    for(txnym in txnyms[[nid]]) {
+      if(grepl('[^a-zA-Z_0-9]', txnym)) {
+        stop(paste0('Unsuitable characters in [',
+                    txnym, ']'))
+      }
+    }
+    tree@ndlst[[nid]][['txnym']] <<- txnyms[[nid]]
+  }
+  pull <- names(txnyms) %in% names(tree@ndlst)
+  txnyms <- txnyms[pull]
+  plyr::m_ply(names(txnyms), .fun=.add)
+  tree@wtxnyms <- TRUE
+  tree
 }
 
 #' @name setPD
@@ -27,11 +55,12 @@ setRoot <- function(...) {
 #' library(treeman)
 #' tree <- randTree(10)
 #' tree <- setPD(tree, val=1)
-#' (tree['pd'])
+#' summary(tree)
 setPD <- function(tree, val) {
   spns <- getNdsSlt(tree, ids=tree@all, slt_nm="spn")
   spns <- spns/(tree@pd/val)
   tree <- setNdsSpn(tree, ids=tree@all, vals=spns)
+  tree@pd <- val
   tree
 }
 
@@ -51,10 +80,11 @@ setPD <- function(tree, val) {
 #' library(treeman)
 #' tree <- randTree(10)
 #' tree <- setAge(tree, val=1)
-#' (tree['age'])
+#' summary(tree)
 setAge <- function(tree, val) {
+  tree_age <- getAge(tree)
   spns <- getNdsSlt(tree, ids=tree@all, slt_nm="spn")
-  spns <- spns/(tree@age/val)
+  spns <- spns/(tree_age)
   tree <- setNdsSpn(tree, ids=tree@all, vals=spns)
   tree
 }
@@ -63,7 +93,6 @@ setAge <- function(tree, val) {
 #' @title Set the branch length of a specific node
 #' @description Return a tree with the span of a node altered.
 #' @details Takes a tree, a node ID and a new value for the node's preceding branch length (span).
-#' Parallelizable.
 #' @param tree \code{TreeMan} object
 #' @param id id of node whose preceding edge is to be changed
 #' @param val new span
@@ -75,37 +104,24 @@ setAge <- function(tree, val) {
 #' @examples
 #' library(treeman)
 #' tree <- randTree(10)
-#' viz(tree)
 #' tree <- setNdSpn(tree, id='t1', val=100)
-#' viz(tree)
-setNdSpn <- function(tree, id, val, ...) {
-  .ptnd <- function(nd) {
-    nd[['prdst']] <- nd[['prdst']] + diff
-    nd
-  }
-  # reset node using diff
-  diff <- val - tree@ndlst[[id]][['spn']]
-  tree@ndlst[[id]][['spn']] <- diff
-  tree@ndlst <- .updateNd(tree@ndlst, id, tree@root)
-  # adjust any pstnds
-  ptids <- getNdPtid(tree, id=id)
-  ptids <- ptids[-(length(ptids))]
-  tree@ndlst[ptids] <- plyr::llply(tree@ndlst[ptids], .fun=.ptnd, ...)
-  # update nd
+#' tree <- updateSlts(tree)
+#' summary(tree)
+setNdSpn <- function(tree, id, val) {
   tree@ndlst[[id]][['spn']] <- val
-  tree@ndlst[[id]][['prdst']] <- tree@ndlst[[id]][['prdst']] +
-    val + abs(diff)
-  .updateTreeSlts(tree)
+  tree@updtd <- FALSE
+  tree
 }
 
 #' @name setNdsSpn
 #' @title Set the branch lengths of specific nodes
-#' @description Return a tree with the span of a node altered.
+#' @description Return a tree with the spans of nodes altered.
 #' @details Runs \code{setNdSpn} over multiple nodes. Parallelizable.
 #' @param tree \code{TreeMan} object
 #' @param ids ids of nodes whose preceding edges are to be changed
 #' @param vals new spans
-#' @param ... \code{plyr} arguments
+#' @param parallel logical, make parallel?
+#' @param progress name of the progress bar to use, see \code{\link{create_progress_bar}}
 #' @seealso
 #' \code{\link{setNdSpn}}
 #' \url{https://github.com/DomBennett/treeman/wiki/set-methods}
@@ -115,62 +131,32 @@ setNdSpn <- function(tree, id, val, ...) {
 #' tree <- randTree(10)
 #' # make tree taxonomic
 #' tree <- setNdsSpn(tree, ids=tree['all'], vals=1)
-setNdsSpn <- function(tree, ids, vals, ...) {
-  .nullify <- function(nd) {
-    nd[['spn']] <- NULL
-    nd[['pd']] <- NULL
-    nd[['prdst']] <- NULL
-    nd
-  }
+#' summary(tree)
+#' # remove spns by setting all to 0
+#' tree <- setNdsSpn(tree, ids=tree['all'], vals=0)
+#' summary(tree)
+setNdsSpn <- function(tree, ids, vals, parallel=FALSE, progress="none") {
   .reset <- function(id, spn) {
     ndlst[[id]][['spn']] <- spn
-    ndlst[[id]][['pd']] <- 0
-    ndlst[[id]][['prdst']] <- 0
     ndlst[[id]]
   }
-  ndlst <- tree@ndlst
-  if(is.null(vals)) {
-    ndlst <- plyr::llply(ndlst[tree@all], .fun=.nullify, ...)
-  } else {
-    spns <- getNdsSlt(tree, slt_nm='spn', ids=tree@all)
-    spns[match(ids, tree@all)] <- vals
-    l_data <- data.frame(id=tree@all, spn=spns, stringsAsFactors=FALSE)
-    ndlst <- plyr::mlply(l_data, .fun=.reset)
-    ndlst <- ndlst[1:length(ndlst)]
-    names(ndlst) <- tree@all
-    ndlst <- .globalUpdateAll(ndlst, just_spn_data=TRUE)
-  }
-  tree@ndlst <- ndlst
-  .updateTreeSlts(tree)
-}
-
-#' @name setTol
-#' @title Set the extinction tolerance
-#' @description Return a tree with the tolerance altered.
-#' @details Extant tips are determined by how close they are to zero. By default this value
-#' is 1e-8. Using this function to change the tolerance will alter the \code{ext} and \code{exc}
-#' slots.
-#' @param tree \code{TreeMan} object
-#' @param tol new tolerance
-#' @seealso
-#' \code{\link{setNdsSpn}}
-#' \url{https://github.com/DomBennett/treeman/wiki/set-methods}
-#' @export
-#' @examples
-#' library(treeman)
-#' tree <- randTree(10)
-#' tree <- setTol(tree, 10)
-#' print(tree)
-setTol <- function(tree, tol) {
-  tree@tol <- tol
-  .updateTreeSlts(tree)
+  ndlst <- tree@ndlst[ids]
+  l_data <- data.frame(id=ids, spn=vals, stringsAsFactors=FALSE)
+  ndlst <- plyr::mlply(l_data, .fun=.reset, .parallel=parallel,
+                       .progress=progress)
+  ndlst <- ndlst[1:length(ndlst)]
+  tree@ndlst[ids] <- ndlst
+  tree <- updateSlts(tree)
+  tree
 }
 
 #' @name setNdID
 #' @title Set the ID of a node
 #' @description Return a tree with the ID of a node altered.
 #' @details IDs cannot be changed directly for the \code{TreeMan} class. To change an
-#' ID use this function. Warning: all IDs must be unique, avoid spaces in IDs.
+#' ID use this function. Warning: all IDs must be unique, avoid spaces in IDs and only
+#' use letters, numbers and underscores.
+#' Use \code{\link{updateSlts}} after running.
 #' @param tree \code{TreeMan} object
 #' @param id id to be changed
 #' @param val new id
@@ -182,7 +168,9 @@ setTol <- function(tree, tol) {
 #' library(treeman)
 #' tree <- randTree(10)
 #' tree <- setNdID(tree, 't1', 'heffalump')
+#' tree <- updateSlts(tree)
 setNdID <- function(tree, id, val) {
+  tree@updtd <- FALSE
   setNdsID(tree, id, val)
 }
 
@@ -190,11 +178,12 @@ setNdID <- function(tree, id, val) {
 #' @title Set the IDs of multiple nodes
 #' @description Return a tree with the IDs of nodes altered.
 #' @details Runs \code{setNdID()} over multiple nodes. Warning: all IDs must be unique,
-#' avoid spaces in IDs. Parellizable.
+#' avoid spaces in IDs, only use numbers, letters and underscores. Parellizable.
 #' @param tree \code{TreeMan} object
 #' @param ids ids to be changed
 #' @param vals new ids
-#' @param ... \code{plyr} arguments
+#' @param parallel logical, make parallel?
+#' @param progress name of the progress bar to use, see \code{\link{create_progress_bar}}
 #' @seealso
 #' \code{\link{setNdID}}
 #' \url{https://github.com/DomBennett/treeman/wiki/set-methods}
@@ -204,7 +193,15 @@ setNdID <- function(tree, id, val) {
 #' tree <- randTree(10)
 #' new_ids <- paste0('heffalump_', 1:tree['ntips'])
 #' tree <- setNdsID(tree, tree['tips'], new_ids)
-setNdsID <- function(tree, ids, vals, ...) {
+#' summary(tree)
+setNdsID <- function(tree, ids, vals, parallel=FALSE, progress="none") {
+  # internals
+  .testSpcls <- function(id) {
+    if(grepl('[^a-zA-Z_0-9]', id)) {
+      stop(paste0('Unsuitable characters in [', id, ']'))
+    }
+    NULL
+  }
   .rplcS4 <- function(slt) {
     if(any(slot(tree, slt) %in% ids)) {
       mtchs <- match(slot(tree, slt), ids)
@@ -213,33 +210,35 @@ setNdsID <- function(tree, ids, vals, ...) {
       return(slot(tree, slt))
     }
   }
-  .run <-function(i) {
+  .reset <-function(i) {
     .rplc <- function(slt) {
-      if(any(nd[[slt]] %in% ids)) {
-        mtchs <- match(nd[[slt]], ids)
-        nd[[slt]] <- vals[mtchs]
-      }
-      nd
+      res <- nd[[slt]]
+      mtchs <- match(res, ids)
+      res[which(!is.na(mtchs))] <-
+        vals[mtchs[!is.na(mtchs)]]
+      res
     }
     nd <- tree@ndlst[[i]]
-    nd <- .rplc("id")
-    nd <- .rplc("ptid")
-    nd <- .rplc("prid")
-    nd <- .rplc("kids")
-    tree@ndlst[[i]] <<- nd
-    NULL
+    nd[['id']] <- .rplc("id")
+    nd[['ptid']] <- .rplc("ptid")
+    nd[['prid']] <- .rplc("prid")
+    nd
   }
-  l_data <- data.frame(i=1:length(tree@ndlst))
-  plyr::m_ply(.data=l_data, .fun=.run, ...)
+  sapply(vals, .testSpcls)
+  l_data <- data.frame(i=1:length(tree@ndlst), stringsAsFactors=FALSE)
+  ndlst <- plyr::mlply(l_data, .fun=.reset, .parallel=parallel, .progress=progress)
+  ndlst <- ndlst[1:length(ndlst)]
+  all <- names(tree@ndlst)
+  all[match(ids, all)] <- vals
+  names(ndlst) <- all
+  tree@ndlst <- ndlst
   tree@tips <- .rplcS4('tips')
   tree@nds <- .rplcS4('nds')
-  tree@ext <- .rplcS4('ext')
-  tree@exc <- .rplcS4('exc')
   tree@root <- .rplcS4('root')
+  tree <- updateSlts(tree)
   tree
 }
 
-#TODO: get these functions working and tested
 #' @name setNdOther
 #' @title Set a user defined slot
 #' @description Return a tree with a user defined slot for node ID.
@@ -258,9 +257,14 @@ setNdsID <- function(tree, ids, vals, ...) {
 #' library(treeman)
 #' tree <- randTree(10)
 #' tree <- setNdOther(tree, 't1', 1, 'binary_val')
+#' tree <- updateSlts(tree)
 #' (getNdSlt(tree, id='t1', slt_nm='binary_val'))
 setNdOther <- function(tree, id, val, slt_nm) {
   tree@ndlst[[id]][slt_nm] <- val
+  tree@updtd <- FALSE
+  if(!slt_nm %in% tree@othr_slt_nms) {
+    tree@othr_slt_nms <- c(tree@othr_slt_nms, slt_nm)
+  }
   tree
 }
 
@@ -272,7 +276,8 @@ setNdOther <- function(tree, id, val, slt_nm) {
 #' @param ids id sof the nodes
 #' @param vals data for slot
 #' @param slt_nm slot name
-#' @param ... \code{plyr} arguments
+#' @param parallel logical, make parallel?
+#' @param progress name of the progress bar to use, see \code{\link{create_progress_bar}}
 #' @seealso
 #' \code{\link{setNdOther}}
 #' \url{https://github.com/DomBennett/treeman/wiki/set-methods}
@@ -280,15 +285,22 @@ setNdOther <- function(tree, id, val, slt_nm) {
 #' @examples
 #' library(treeman)
 #' tree <- randTree(10)
-#' vals <- sample(0:1, size=tree['nall'], replace=TRUE)
-#' tree <- setNdsOther(tree, tree['all'], vals, 'binary_val')
-#' (getNdsSlt(tree, ids=tree['all'], slt_nm='binary_val'))
-setNdsOther <- function(tree, ids, vals, slt_nm, ...) {
+#' # e.g. confidences for nodes
+#' vals <- runif(min=0, max=1, n=tree['nall'])
+#' tree <- setNdsOther(tree, tree['all'], vals, 'confidence')
+#' tree <- updateSlts(tree)
+#' summary(tree)
+#' (getNdsSlt(tree, ids=tree['all'], slt_nm='confidence'))
+setNdsOther <- function(tree, ids, vals, slt_nm, parallel=FALSE, progress="none") {
   .set <- function(id, val) {
     tree@ndlst[[id]][[slt_nm]] <<- val
   }
   l_data <- data.frame(id=ids, val=vals,
                        stringsAsFactors=FALSE)
-  plyr::m_ply(.data=l_data, .fun=.set)
+  plyr::m_ply(.data=l_data, .fun=.set, .parallel=parallel, .progress=progress)
+  tree@updtd <- FALSE
+  if(!slt_nm %in% tree@othr_slt_nms) {
+    tree@othr_slt_nms <- c(tree@othr_slt_nms, slt_nm)
+  }
   tree
 }

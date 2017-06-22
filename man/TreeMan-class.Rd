@@ -4,26 +4,29 @@
 \name{TreeMan-class}
 \alias{TreeMan-class}
 \alias{TreeMan-method}
-\alias{[,TreeMan,character-method}
 \alias{[[,TreeMan,character-method}
+\alias{[,TreeMan,character,missing,missing-method}
 \alias{as.character,TreeMan-method}
-\alias{cTrees,TreeMan-method}
-\alias{print,TreeMan-method}
 \alias{show,TreeMan-method}
+\alias{print,TreeMan-method}
 \alias{str,TreeMan-method}
+\alias{summary,TreeMan-method}
+\alias{cTrees,TreeMan-method}
 \title{TreeMan-class}
 \usage{
 \S4method{[[}{TreeMan,character}(x, i)
 
-\S4method{[}{TreeMan,character}(x, i)
+\S4method{[}{TreeMan,character,missing,missing}(x, i, j, ..., drop = TRUE)
 
 \S4method{as.character}{TreeMan}(x)
 
 \S4method{show}{TreeMan}(object)
 
+\S4method{print}{TreeMan}(x)
+
 \S4method{str}{TreeMan}(object, max.level = 2L, ...)
 
-\S4method{print}{TreeMan}(x)
+\S4method{summary}{TreeMan}(object)
 
 \S4method{cTrees}{TreeMan}(x, ...)
 }
@@ -32,11 +35,15 @@
 
 \item{i}{node ID or slot name}
 
+\item{j}{missing}
+
+\item{...}{additional tree objects}
+
+\item{drop}{missing}
+
 \item{object}{\code{TreeMan} object}
 
 \item{max.level}{\code{str()} maximum number of levels to show}
-
-\item{...}{additional tree objects}
 }
 \description{
 S4 class for representing phylogenetic trees as a list of nodes.
@@ -53,14 +60,9 @@ Each node within the \code{TreeMan} \code{ndlst} contains the following data slo
    \item \code{id}: character string for the node ID
    \item \code{txnym}: name of taxonomic clade (optional)
    \item \code{spn}: length of the preceding branch
-   \item \code{prid}: IDs of the preceding nodes to the root
+   \item \code{prid}: ID of the immediately preceding node, NULL if root
    \item \code{ptid}: IDs of the immediately connecting nodes
-   \item \code{kids}: descending tip IDs
-   \item \code{pd}: phylogenetic diversity represented by node
-   \item \code{prdst}: pre distance(distance to root if rooted or
-   most distal tip if unrooted)
 }
-These data slots are updated whenever a node is modified, added or removed.
 
 See below in 'Examples' for these methods in use.
 }
@@ -81,54 +83,58 @@ See below in 'Examples' for these methods in use.
 
 \item{\code{nall}}{numeric of number of all nodes in tree}
 
-\item{\code{age}}{numeric of max root to tip distance}
-
 \item{\code{pd}}{numeric of total branch length of tree}
 
-\item{\code{ext}}{vector of node ids of all tips with 0 age}
+\item{\code{tinds}}{indexes of all tip nodes in tree}
 
-\item{\code{exc}}{vector of node ids of all tips with age > 0}
+\item{\code{prinds}}{indexes of all pre-nodes in tree}
 
 \item{\code{wspn}}{logical, do nodes have spans}
 
-\item{\code{ultr}}{logical, do all tips end at 0}
+\item{\code{wtxnyms}}{logical, do nodes have txnyms}
 
 \item{\code{ply}}{logical, is tree bifurcating}
 
-\item{\code{tol}}{numeric of tolerance for determining extant}
-
 \item{\code{root}}{character of node id of root, if no root then empty character}
+
+\item{\code{updtd}}{logical, if tree slots have been updated since initiation or change}
+
+\item{\code{othr_slt_nms}}{vector, character list of additional data slots added to nodes}
+
+\item{\code{ndmtrx}}{matrix, T/Fs representing tree structure}
 }}
+
 \examples{
 library(treeman)
 # Generate random tree
 tree <- randTree(10)
 # Print to get basic stats
-print(tree)
-# Currently available methods
-tree['tips']  # return all tips IDs
-tree['nds']  # return all internal node IDs
+summary(tree)
+# Slots....
+tree['tips']   # return all tips IDs
+tree['nds']    # return all internal node IDs
 tree['ntips']  # count all tips
-tree['nnds']  # count all internal nodes
-tree['root']  # identify root node
-tree[['t1']]  # return t1 node object
-tree['pd']  # return phylogenetic diversity
-tree['age']  # return age of tree
-tree['ultr']  # is ultrametric?
-tree['ply']  # is polytomous?
-tree['ext']  # return all extant tip IDs
-tree['exc']  # return all extinct tip IDs
-tree <- setTol(tree, 10)  # reset tolerance, default 1e-8
-# now tol is higher more tips will be classed as extant
-tree['ext']
+tree['nnds']   # count all internal nodes
+tree['root']   # identify root node
+tree[['t1']]   # return t1 node object
+tree['pd']     # return phylogenetic diversity
+tree['ply']    # is polytomous?
+# Additional special slots
+tree['age']   # get tree's age
+tree['ultr']  # determine if tree is ultrametric
 # Because all nodes are lists with metadata we can readily
 #  get specific information on nodes of interest
 nd <- tree[['n2']]
-print(nd)
+summary(nd)
 # And then use the same syntax for the tree
-nd['age']  # .... nkids, pd, etc.
+nd['nkids']  # .... nkids, pd, etc.
+
+# Convert to phylo and plot
+library(ape)
+tree <- as(tree, 'phylo')
+plot(tree)
 }
 \seealso{
-\code{\link{randTree}}, \code{\link{Node-class}}, \code{\link{viz}}
+\code{\link{randTree}}, \code{\link{Node-class}},
+\code{\link{phylo-to-TreeMan}}, \code{\link{TreeMan-to-phylo}}
 }
-

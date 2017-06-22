@@ -23,10 +23,9 @@ that by modiyfing every branch, while maintaining their relative lengths.
 library(treeman)
 tree <- randTree(10)
 tree <- setAge(tree, val=1)
-(tree['age'])
+summary(tree)
 }
 \seealso{
 \code{\link{setPD}}
 \url{https://github.com/DomBennett/treeman/wiki/set-methods}
 }
-

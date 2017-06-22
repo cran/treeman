@@ -4,20 +4,29 @@
 \name{TreeMen-class}
 \alias{TreeMen-class}
 \alias{TreeMen-method}
-\alias{[,TreeMen,character-method}
-\alias{[[,TreeMen,ANY-method}
-\alias{as.character,TreeMen-method}
 \alias{cTrees,TreeMen-method}
-\alias{print,TreeMen-method}
+\alias{[[,TreeMen,ANY-method}
+\alias{[,TreeMen,character,missing,missing-method}
+\alias{TreeMen-method}
+\alias{Extract}
+\alias{slots}
+\alias{from}
+\alias{a}
+\alias{list}
+\alias{of}
+\alias{trees}
+\alias{as.character,TreeMen-method}
 \alias{show,TreeMen-method}
 \alias{str,TreeMen-method}
+\alias{print,TreeMen-method}
+\alias{summary,TreeMen-method}
 \title{TreeMen-class}
 \usage{
 \S4method{cTrees}{TreeMen}(x, ...)
 
 \S4method{[[}{TreeMen,ANY}(x, i)
 
-\S4method{[}{TreeMen,character}(x, i)
+\S4method{[}{TreeMen,character,missing,missing}(x, i, j, ..., drop = TRUE)
 
 \S4method{as.character}{TreeMen}(x)
 
@@ -26,6 +35,8 @@
 \S4method{str}{TreeMen}(object, max.level = 2L, ...)
 
 \S4method{print}{TreeMen}(x)
+
+\S4method{summary}{TreeMen}(object)
 }
 \arguments{
 \item{x}{\code{TreeMen} object}
@@ -33,6 +44,10 @@
 \item{...}{additional tree objects}
 
 \item{i}{tree index (integer or character)}
+
+\item{j}{missing}
+
+\item{drop}{missing}
 
 \item{object}{\code{TreeMen} object}
 
@@ -44,13 +59,13 @@ S4 class for multiple phylogenetic trees
 \section{Slots}{
 
 \describe{
-\item{\code{treelist}}{list of \code{TreeMan} objects}
+\item{\code{treelst}}{list of \code{TreeMan} objects}
 
 \item{\code{ntips}}{sum of tips per tree}
 
 \item{\code{ntrees}}{total number of trees}
 }}
+
 \seealso{
 \code{\link{cTrees}}
 }
-

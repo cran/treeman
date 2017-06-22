@@ -1,167 +1,108 @@
 
-# TODO: need to rethink this, make it more logical
-# -- update tips or nodes
-# -- update upstream or downstream or all
-# -- update prdst, pd, kids or all
-
-.updateNdsSlt <- function(ndlst, nids, updater) {
-  # update nids using updater function
-  ndlst[nids] <- plyr::llply(ndlst[nids], .fun=updater)
-  ndlst
+#' @name pstMnp
+#' @title Update prinds and tinds
+#' @description Return tree with updated slots.
+#' @details This function is automatically run. Only run, if you
+#' are creating yor own functions to add and remove elements of the
+#' \code{ndlst}.
+#' @param tree \code{TreeMan} object
+#' @seealso
+#' \code{\link{updateSlts}}, \code{\link{addNdmtrx}},
+#' \code{\link{getAge}}
+#' @export
+pstMnp <- function(tree) {
+  # after any adding or removing of tips and nodes,
+  # these slots MUST be updated to ensure full functionality
+  tree@tinds <- .getTinds(tree@ndlst)
+  tree@prinds <- .getPrinds(tree@ndlst)
+  tree
 }
 
-.dwndateNd <- function(ndlst, nid, rid) {
-  .add <- function(nd) {
-    nd[['pd']] <- nd[['pd']] - nd_spn
-    nd[['kids']] <- nd[['kids']][nd[['kids']] != nid]
-    nd
-  }
-  nd_spn <- ndlst[[nid]][['spn']]
-  prids <- ndlst[[nid]][['prid']]
-  ndlst[prids] <- plyr::llply(ndlst[prids], .fun=.add)
-  ndlst
-}
-
-.updateNd <- function(ndlst, nid, rid) {
-  .add <- function(nd) {
-    nd[['pd']] <- nd[['pd']] + nd_spn
-    prdst <<- nd[['spn']] + prdst
-    nd
-  }
-  nd_spn <- ndlst[[nid]][['spn']]
-  prdst <- nd_spn
-  prids <- ndlst[[nid]][['prid']]
-  ndlst[prids] <- plyr::llply(ndlst[prids], .add)
-  ndlst[[nid]][['prdst']] <- prdst
-  ndlst
-}
-
-.dwndateTip <- function(ndlst, tid, rid) {
-  .add <- function(nd) {
-    kids <- nd[['kids']]
-    nd[['kids']] <- kids[kids != tid]
-    nd[['pd']] <- nd[['pd']] - tp_spn
-    nd
-  }
-  tp_spn <- ndlst[[tid]][['spn']]
-  prids <- ndlst[[tid]][['prid']]
-  ndlst[prids] <- plyr::llply(ndlst[prids], .fun=.add)
-  ndlst
-}
-
-.updateTip <- function(ndlst, tid, rid) {
-  .add <- function(nd) {
-    kids <- nd[['kids']]
-    nd[['kids']] <- c(kids, tid)
-    nd[['pd']] <- nd[['pd']] + tp_spn
-    prdst <<- nd[['spn']] + prdst
-    nd
-  }
-  tp_spn <- ndlst[[tid]][['spn']]
-  prids <- ndlst[[tid]][['prid']]
-  prdst <- tp_spn
-  ndlst[prids] <- plyr::llply(ndlst[prids], .add)
-  ndlst[[tid]][['prdst']] <- prdst
-  ndlst
-}
-
-.globalUpdateAll <- function(ndlst, just_spn_data=FALSE) {
-  tip <- function(tid) {
-    ndlst <- .updateTip(ndlst, tid, rid)
-    ndlst <<- ndlst
-  }
-  nd <- function(nid) {
-    ndlst <- .updateNd(ndlst, nid, rid)
-    ndlst <<- ndlst
-  }
-  wo_prnds <- sapply(ndlst, function(n) length(n[['prid']]) == 0)
-  if(!just_spn_data) {
-    wo_pstnds <- sapply(ndlst, function(n) length(n[['ptid']]) == 0)
-    nids <- names(ndlst)[(!wo_pstnds) & (!wo_prnds)]
-    tids <- names(ndlst)[wo_pstnds]
-    rid <- names(ndlst)[wo_prnds]
-    l_data <- data.frame(tid=tids, stringsAsFactors=FALSE)
-    plyr::m_ply(.data=l_data, .fun=tip)
-  } else {
-    # just run updateNd for all nodes if just spn data needs updating
-    nids <- names(ndlst)[!wo_prnds]
-    rid <- names(ndlst)[wo_prnds]
-  }
-  l_data <- data.frame(nid=nids, stringsAsFactors=FALSE)
-  plyr::m_ply(.data=l_data, .fun=nd)
-  ndlst
-}
-
-.updateKids <- function(ndlst, tid, rid) {
-  .add <- function(nd) {
-    kids <- nd[['kids']]
-    nd[['kids']] <- c(kids, tid)
-    nd
-  }
-  prids <- ndlst[[tid]][['prid']]
-  ndlst[prids] <- plyr::llply(ndlst[prids], .fun=.add)
-  ndlst
-}
-
-.dwndateKids <- function(ndlst, tid, rid) {
-  .add <- function(nd) {
-    kids <- nd[['kids']]
-    nd[['kids']] <- kids[kids != tid]
-    nd
-  }
-  prids <- ndlst[[tid]][['prid']]
-  ndlst[prids] <- plyr::llply(ndlst[prids], .fun=.add)
-  ndlst
-}
-
-.globalUpdateKids <- function(ndlst) {
-  tip <- function(tid) {
-    ndlst <- .updateKids(ndlst, tid, rid)
-    ndlst <<- ndlst
-  }
-  wo_pstnds <- sapply(ndlst, function(n) length(n[['ptid']]) == 0)
-  w_prnds <- sapply(ndlst, function(n) length(n[['prid']]) == 0)
-  tids <- names(ndlst)[wo_pstnds]
-  rid <- names(ndlst)[w_prnds]
-  l_data <- data.frame(tid=tids, stringsAsFactors=FALSE)
-  plyr::m_ply(.data=l_data, .fun=tip)
-  ndlst
-}
-
-.updateTreeSlts <- function(tree) {
+#' @name updateSlts
+#' @title Update tree slots after manipulation
+#' @description Return tree with updated slots.
+#' @details Tree slots in the \code{TreeMan} object are usually automatically updated.
+#' For certain single node manipulations they are not. Run this
+#' function to update the slots.
+#' @param tree \code{TreeMan} object
+#' @seealso
+#' \code{\link{addNdmtrx}}, \code{\link{getAge}}
+#' @export
+updateSlts <- function(tree) {
+  # Update the slots for a tree
   wo_pstndes <- sapply(tree@ndlst,
                        function(n) length(n[['ptid']]) == 0)
   tree@tips <- sort(names(wo_pstndes)[wo_pstndes])
   tree@ntips <- length(tree@tips)
   tree@nds <- sort(names(wo_pstndes)[!wo_pstndes])
   tree@nnds <- length(tree@nds)
-  tree@all <- c(tree@tips, tree@nds)
+  tree@all <- names(tree@ndlst)
   tree@nall <- length(tree@all)
-  if(length(tree@root) > 0) {
-    wspn <- names(tree@ndlst)[names(tree@ndlst) != tree@root]
-  } else {
-    wspn <- names(tree@ndlst)
-  }
-  tree@wspn <- all(sapply(tree@ndlst[wspn], function(n) !is.null(n[['spn']])))
+  tree@wtxnyms <- any(sapply(tree@ndlst, function(n) !is.null(n[['txnym']])))
+  spns <- sapply(tree@ndlst, function(n) n[['spn']])
+  tree@wspn <- any(spns > 0)
   if(tree@wspn) {
-    if(length(tree@root) > 0) {
-      tree@age <- max(sapply(tree@ndlst[wspn], function(n) n[['prdst']]))
-      extant_is <- unlist(sapply(tree@tips, function(i) {
-        (tree@age - tree@ndlst[[i]][['prdst']]) <= tree@tol}))
-      tree@ext <- names(extant_is)[extant_is]
-      tree@exc <- tree@tips[!tree@tips %in% tree@ext]
-      tree@ultr <- all(tree@tips %in% tree@ext)
-    } else {
-      tree@ext <- tree@exc <- vector()
-      tree@ultr <- FALSE
-      tree@age <- numeric()
-    }
     tree@pd <- sum(sapply(tree@ndlst, function(n) n[['spn']]))
   } else {
-    tree@age <- tree@pd <- numeric()
-    tree@ext <- tree@ext <- vector()
-    tree@ultr <- logical()
+    tree@pd <- numeric()
   }
   tree@ply <- any(sapply(tree@ndlst, function(n) length(n[['ptid']]) > 2))
+  tree@updtd <- TRUE
   initialize(tree)
+}
+
+#' @name addNdmtrx
+#' @title Add node matrix to a tree
+#' @description Return tree with node matrix added.
+#' @details The node matrix makes 'enquiry'-type computations faster:
+#' determining node ages, number of descendants etc. But it takes up
+#' large amounts of memory and has no impact on adding or removing tips.
+#' Note, trees with the node matrix can not be written to disk using the
+#' 'serialization format' i.e. with \code{save} or \code{saveRDS}.
+#' The matrix is generated with bigmemory's `as.big.matrix()`.
+#' @param tree \code{TreeMan} object
+#' @param shared T/F, should the bigmatrix be shared? See bigmemory documentation.
+#' @param ... \code{as.big.matrix()} additional arguments
+#' @seealso
+#' \code{\link{updateSlts}}, \code{\link{rmNdmtrx}},
+#' \url{https://cran.r-project.org/package=bigmemory}
+#' @export
+#' @examples
+#' # library(treeman)
+#' tree <- randTree(10, wndmtrx=FALSE)
+#' summary(tree)
+#' tree <- addNdmtrx(tree)
+#' summary(tree)
+addNdmtrx <- function(tree, shared=FALSE, ...) {
+  if(tree@ntips < 3) {
+    stop('Too small for node matrix.')
+  }
+  if(!checkNdlst(tree@ndlst, tree@root)) {
+    stop('Invalid tree')
+  }
+  if(is.null(tree@ndmtrx)) {
+    # generate ndmtrx
+    tree@ndmtrx <- .getNdmtrxFrmLst(tree@ndlst, shared=shared, ...)
+  }
+  tree
+}
+
+#' @name rmNdmtrx
+#' @title Remove node matrix
+#' @description Return tree with memory heavy node matrix removed.
+#' @details Potential uses: reduce memory load of a tree,
+#' save tree using serialization methods.
+#' @param tree \code{TreeMan} object
+#' @seealso
+#' \code{\link{addNdmtrx}}
+#' @export
+#' @examples
+#' # library(treeman)
+#' tree <- randTree(10)
+#' summary(tree)
+#' tree <- rmNdmtrx(tree)
+#' summary(tree)
+rmNdmtrx <- function(tree) {
+  tree@ndmtrx <- NULL
+  tree
 }

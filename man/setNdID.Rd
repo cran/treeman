@@ -18,15 +18,17 @@ Return a tree with the ID of a node altered.
 }
 \details{
 IDs cannot be changed directly for the \code{TreeMan} class. To change an
-ID use this function. Warning: all IDs must be unique, avoid spaces in IDs.
+ID use this function. Warning: all IDs must be unique, avoid spaces in IDs and only
+use letters, numbers and underscores.
+Use \code{\link{updateSlts}} after running.
 }
 \examples{
 library(treeman)
 tree <- randTree(10)
 tree <- setNdID(tree, 't1', 'heffalump')
+tree <- updateSlts(tree)
 }
 \seealso{
 \code{\link{setNdsID}}
 \url{https://github.com/DomBennett/treeman/wiki/set-methods}
 }
-

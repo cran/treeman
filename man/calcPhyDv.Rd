@@ -4,14 +4,16 @@
 \alias{calcPhyDv}
 \title{Calculate phylogenetic diversity}
 \usage{
-calcPhyDv(tree, tids, ...)
+calcPhyDv(tree, tids, parallel = FALSE, progress = "none")
 }
 \arguments{
 \item{tree}{\code{TreeMan} object}
 
 \item{tids}{tip ids}
 
-\item{...}{\code{plyr} arguments}
+\item{parallel}{logical, make parallel?}
+
+\item{progress}{name of the progress bar to use, see \code{\link{create_progress_bar}}}
 }
 \description{
 Returns the phylogenetic diversity of a tree for the tips specified.
@@ -20,6 +22,7 @@ Returns the phylogenetic diversity of a tree for the tips specified.
 Faith's phylogenetic diversity is calculated as the sum of all connected
 branches for specified tips in a tree. It can be used to investigate how biodviersity
 as measured by the phylogeny changes. Parallelizable.
+The function uses \code{getCnntdNds()}.
 }
 \examples{
 library(treeman)
@@ -31,7 +34,6 @@ Faith, D. (1992). Conservation evaluation and phylogenetic diversity.
  Biological Conservation, 61, 1-10.
 }
 \seealso{
-\code{\link{calcFrPrp}}, \code{\link{calcOvrlp}}
+\code{\link{calcFrPrp}}, \code{\link{calcOvrlp}}, \code{\link{getCnnctdNds}},
 \url{https://github.com/DomBennett/treeman/wiki/calc-methods}
 }
-

@@ -4,109 +4,151 @@
 #' tips.
 #' @details Equivalent to \code{ape}'s \code{rtree()} but returns a
 #' \code{TreeMan} tree. Tree is always rooted and bifurcating.
-#' @param n number of tips, integer, must be greater than 1
+#' @param n number of tips, integer, must be 3 or greater
+#' @param wndmtrx T/F add node matrix? Default FALSE.
+#' @param parallel T/F run in parallel? Default FALSE.
 #' @seealso
-#' \code{\link{TreeMan-class}}
+#' \code{\link{TreeMan-class}}, \code{\link{blncdTree}},
+#' \code{\link{unblncdTree}}
 #' @export
 #' @examples
 #' library(treeman)
 #' tree <- randTree(5)
-
-randTree <- function(n) {
-  .nd <- function(n_left, id, spn, pre, predist, ndlst) {
-    post <- kids <- c()
-    pd <- 0
-    nd <- list('id'=id,
-                  'spn'=spn,
-                  'prid'=pre,
-                  'ptid'=post,
-                  'kids'=kids,
-                  'pd'=pd,
-                  'prdst'=predist)
-    ndlst[[id]] <- nd
-    # if there are enough ns left to have kids
-    n_left <- n_left - 1
-    if(n_left > 1) {
-      nls <- n_left
-      if(n_left == 2) {
-        nls <- c(1, 1)
+randTree <- function(n, wndmtrx=FALSE, parallel=FALSE) {
+  # Return a random tree based on a broken-stick model
+  .randomPrinds <- function(n) {
+    pool <- rep((1:(n-1)), each=2)
+    res <- rep(NA, length(pool)+1)
+    res[1] <- 1
+    for(i in 2:length(res)) {
+      pssbls <- which(i > pool)
+      if(length(pssbls) == 1) {
+        i_pool <- pssbls
       } else {
-        # split must be binary
-        splits <- seq(from=1, to=((n_left)-1)/2, by=2)
-        nls[2] <- sample(splits, 1)
-        nls[1] <- n_left - nls[2]
+        i_pool <- sample(pssbls, 1)
       }
-      for(nl in nls) {
-        if(nl == 1) {
-          ntips <<- ntips + 1
-          new_id <- paste0('t', ntips)
-          kids <- c(new_id, kids)
-        } else {
-          nnds <<- nnds + 1
-          new_id <- paste0('n', nnds)
-        }
-        post <- c(post, new_id)
-        new_spn <- runif(min=0, max=1, n=1)
-        new_pre <- c(id, pre)
-        new_predist <- predist + new_spn
-        ndlst <- .nd(nl, new_id, new_spn,
-                           new_pre, new_predist, ndlst)
-        kids <- c(kids, ndlst[[new_id]][['kids']])
-        pd <- pd + new_spn + ndlst[[new_id]][['pd']]
-      }
+      res[i] <- pool[i_pool]
+      pool[i_pool] <- NA
     }
-    ndlst[[id]][['kids']] <- kids
-    ndlst[[id]][['ptid']] <- post
-    ndlst[[id]][['pd']] <- pd
-    ndlst
+    res
   }
-  if(n < 2) {
-    stop('`n` must be greater than 1')
+  if(n < 3) {
+    stop("`n` is too small")
   }
-  # init empty ndlst
-  ntips <- 0
-  nnds <- 1
+  prinds <- .randomPrinds(n)
+  .cnstrctTree(n, prinds, wndmtrx=wndmtrx,
+               parallel=parallel)
+}
+
+#' @name blncdTree
+#' @title Generate a balanced tree
+#' @description Returns a balanced \code{TreeMan} tree with \code{n}
+#' tips.
+#' @details Equivalent to \code{ape}'s \code{stree(type='balanced')} but returns a
+#' \code{TreeMan} tree. Tree is always rooted and bifurcating.
+#' @param n number of tips, integer, must be 3 or greater
+#' @param wndmtrx T/F add node matrix? Default FALSE.
+#' @param parallel T/F run in parallel? Default FALSE.
+#' @seealso
+#' \code{\link{TreeMan-class}}, \code{\link{randTree}},
+#' \code{\link{unblncdTree}}
+#' @export
+#' @examples
+#' library(treeman)
+#' tree <- blncdTree(5)
+blncdTree <- function(n, wndmtrx=FALSE, parallel=FALSE) {
+  if(n < 3) {
+    stop("`n` is too small")
+  }
+  prinds <- c(1, rep((1:(n-1)), each=2))
+  .cnstrctTree(n, prinds, wndmtrx=wndmtrx,
+               parallel=parallel)
+}
+
+#' @name unblncdTree
+#' @title Generate an unbalanced tree
+#' @description Returns an unbalanced \code{TreeMan} tree with \code{n}
+#' tips.
+#' @details Equivalent to \code{ape}'s \code{stree(type='left')} but returns a
+#' \code{TreeMan} tree. Tree is always rooted and bifurcating.
+#' @param n number of tips, integer, must be 3 or greater
+#' @param wndmtrx T/F add node matrix? Default FALSE.
+#' @param parallel T/F run in parallel? Default FALSE.
+#' @seealso
+#' \code{\link{TreeMan-class}}, \code{\link{randTree}},
+#' \code{\link{blncdTree}}
+#' @export
+#' @examples
+#' library(treeman)
+#' tree <- unblncdTree(5)
+unblncdTree <- function(n, wndmtrx=FALSE, parallel=FALSE) {
+  if(n < 3) {
+    stop("`n` is too small")
+  }
+  prinds <- c(1, 1:(n-1), 1:(n-1))
+  .cnstrctTree(n, prinds, wndmtrx=wndmtrx,
+               parallel=parallel)
+}
+
+.cnstrctTree <- function(n, prinds, wndmtrx, parallel) {
+  .add <- function(i) {
+    nd <- vector("list", length=4)
+    names(nd) <- c('id', 'ptid', 'prid', 'spn')
+    nd[['id']] <- ids[i]
+    nd[['spn']] <- spns[i]
+    nd[['prid']] <- ids[prinds[i]]
+    nd[['ptid']] <- ptids[ptnds_pool == i]
+    nd
+  }
+  nnds <- length(prinds)
+  # random numbers for spans
+  spns <- c(0, runif(nnds-1, 0, 1))
+  ids <- rep(NA, nnds)
+  tinds <- which(!1:nnds %in% prinds)
+  ids[tinds] <- paste0('t', 1:n)
+  ids[1:nnds %in% prinds] <- paste0('n', 1:(n-1))
+  ptnds_pool <- prinds[-1]
+  ptids <- ids[-1]
+  ndlst <- plyr::mlply(.data=1:nnds, .fun=.add, .parallel=parallel)
+  attr(ndlst, "split_labels") <- 
+    attr(ndlst, "split_type") <- NULL
+  names(ndlst) <- ids
+  tree <- new('TreeMan', ndlst=ndlst, root='n1', wtxnyms=FALSE,
+              ndmtrx=NULL, prinds=prinds, tinds=tinds)
+  tree <- updateSlts(tree)
+  if(wndmtrx) {
+    tree <- addNdmtrx(tree)
+  }
+  tree
+}
+
+#' @name twoer
+#' @title Generate a tree of two tips
+#' @description Returns a \code{TreeMan} tree with two tips and a root.
+#' @details Useful for building larger trees with \code{addClade()}.
+#' Note, a node matrix cannot be added to a tree of two tips.
+#' @param tids tip IDs
+#' @param spns tip spans
+#' @param rid root ID
+#' @param root_spn root span
+#' @seealso
+#' \code{\link{TreeMan-class}}, \code{\link{randTree}}
+#' @export
+#' @examples
+#' library(treeman)
+#' tree <- twoer()
+twoer <- function(tids=c('t1', 't2'), spns=c(1,1),
+                  rid='root', root_spn=0) {
   ndlst <- list()
-  n_left <-(n - 1) + n
-  # generate root node
-  id <- paste0('n', 1)
-  predist <- spn <- 0
-  pre <- c()
-  # gen nodelist
-  ndlst <- .nd(n_left, id, spn, pre, predist, ndlst)
-  # init new tree object
-  tree <- new('TreeMan', ndlst=ndlst, root='n1')
-  .updateTreeSlts(tree)
+  ndlst[[rid]] <- list('id'=rid, 'prid'=rid,
+                       'ptid'=tids[1:2], 'spn'=root_spn)
+  ndlst[[tids[1]]] <- list('id'=tids[[1]], 'prid'=rid,
+                           'ptid'=NULL, 'spn'=spns[1])
+  ndlst[[tids[2]]] <- list('id'=tids[[2]], 'prid'=rid,
+                           'ptid'=NULL, 'spn'=spns[2])
+  prinds <- c(1, 1, 1)
+  tinds <- c(2, 3)
+  tree <- new('TreeMan', ndlst=ndlst, root='root', wtxnyms=FALSE,
+              ndmtrx=NULL, prinds=prinds, tinds=tinds)
+  updateSlts(tree)
 }
-
-blncdTree <- function(...) {
-  cat('This function is in progress.... \n')
-}
-
-imblncdTree <- function(...) {
-  cat('This function is in progress.... \n')
-}
-
-#@name blncdTree
-# blncdTree <- function(n) {
-#   mkNd <- function(id, prid, ptid, pd) {
-#     nd <- list('id'=id,
-#                   'spn'=1,
-#                   'prid'=pre,
-#                   'ptid'=post,
-#                   'kids'=kids,
-#                   'pd'=pd,
-#                   'prdst'=prdst)
-#     nd
-#   }
-#   prdst <- n/2
-#   is <- seq(from=2, to=n, by=2)
-#   cntr <- 0
-#   ndlst <- list()
-#   for(i in is) {
-#     id <- paste0()
-#     ndlst <- mkNd
-#   }
-#   
-#   
-# }

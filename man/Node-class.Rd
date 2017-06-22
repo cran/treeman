@@ -4,10 +4,11 @@
 \name{Node-class}
 \alias{Node-class}
 \alias{Node-method}
-\alias{[,Node,character-method}
 \alias{as.character,Node-method}
-\alias{print,Node-method}
 \alias{show,Node-method}
+\alias{print,Node-method}
+\alias{summary,Node-method}
+\alias{[,Node,character,missing,missing-method}
 \title{Node-class}
 \usage{
 \S4method{as.character}{Node}(x)
@@ -16,7 +17,9 @@
 
 \S4method{print}{Node}(x)
 
-\S4method{[}{Node,character}(x, i)
+\S4method{summary}{Node}(object)
+
+\S4method{[}{Node,character,missing,missing}(x, i, j, ..., drop = TRUE)
 }
 \arguments{
 \item{x}{\code{Node} object}
@@ -24,10 +27,17 @@
 \item{object}{\code{Node} object}
 
 \item{i}{slot name}
+
+\item{j}{missing}
+
+\item{...}{missing}
+
+\item{drop}{missing}
 }
 \description{
 The \code{Node} is an S4 class used for displaying node information.
-It is only generated when a user implements the \code{[[]]} on a tree.
+It is only generated when a user implements the \code{[[]]} on a tree. Information
+is only accurate if tree has been updated with \code{updateTree()}.
 }
 \section{Slots}{
 
@@ -50,13 +60,11 @@ It is only generated when a user implements the \code{[[]]} on a tree.
 
 \item{\code{prdst}}{total branch length of connected prids}
 
-\item{\code{age}}{age of node in tree}
-
 \item{\code{root}}{T/F root node?}
 
 \item{\code{tip}}{T/F tip node?}
 }}
-\seealso{
-\code{\link{cTrees}}
-}
 
+\seealso{
+\code{\link{TreeMan-class}}, \code{\link{TreeMen-class}}
+}

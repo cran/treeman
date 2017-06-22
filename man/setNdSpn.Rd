@@ -4,7 +4,7 @@
 \alias{setNdSpn}
 \title{Set the branch length of a specific node}
 \usage{
-setNdSpn(tree, id, val, ...)
+setNdSpn(tree, id, val)
 }
 \arguments{
 \item{tree}{\code{TreeMan} object}
@@ -20,17 +20,15 @@ Return a tree with the span of a node altered.
 }
 \details{
 Takes a tree, a node ID and a new value for the node's preceding branch length (span).
-Parallelizable.
 }
 \examples{
 library(treeman)
 tree <- randTree(10)
-viz(tree)
 tree <- setNdSpn(tree, id='t1', val=100)
-viz(tree)
+tree <- updateSlts(tree)
+summary(tree)
 }
 \seealso{
 \code{\link{setNdsSpn}}
 \url{https://github.com/DomBennett/treeman/wiki/set-methods}
 }
-

@@ -4,14 +4,14 @@
 \alias{calcFrPrp}
 \title{Calculate evolutionary distinctness}
 \usage{
-calcFrPrp(tree, tids, ...)
+calcFrPrp(tree, tids, progress = "none")
 }
 \arguments{
 \item{tree}{\code{TreeMan} object}
 
 \item{tids}{tip IDs}
 
-\item{...}{\code{plyr} arguments}
+\item{progress}{name of the progress bar to use, see \code{\link{create_progress_bar}}}
 }
 \description{
 Returns the evolutationary distinctness of ids using the fair proportion metric.
@@ -31,7 +31,6 @@ Isaac, N.J.B., Turvey, S.T., Collen, B., Waterman, C. and Baillie, J.E.M. (2007)
  Mammals on the EDGE: conservation priorities based on threat and phylogeny. PLoS ONE, 2, e296.
 }
 \seealso{
-\code{\link{calcPhyDv}}
+\code{\link{calcPhyDv}}, \code{\link{calcPrtFrPrp}},
 \url{https://github.com/DomBennett/treeman/wiki/calc-methods}
 }
-

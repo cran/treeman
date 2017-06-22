@@ -4,12 +4,16 @@
 \alias{calcDstMtrx}
 \title{Calculate the distance matrix}
 \usage{
-calcDstMtrx(tree, ids)
+calcDstMtrx(tree, ids, parallel = FALSE, progress = "none")
 }
 \arguments{
 \item{tree}{\code{TreeMan} object}
 
 \item{ids}{IDs of nodes/tips}
+
+\item{parallel}{logical, make parallel?}
+
+\item{progress}{name of the progress bar to use, see \code{\link{create_progress_bar}}}
 }
 \description{
 Returns a distance matrix for specified ids of a tree.
@@ -17,7 +21,7 @@ Returns a distance matrix for specified ids of a tree.
 \details{
 The distance between every id in the tree is calculated by summing the
 lengths of the branches that connect them. This can be useful for testing the distances
-between trees, checking for evoltuionary isolated tips etc.
+between trees, checking for evoltuionary isolated tips etc. Parallelizable.
 }
 \examples{
 # checking the distance between two trees
@@ -33,4 +37,3 @@ as.numeric(1 - mdl$estimate)  # 1 - Pearson's r
 \code{\link{calcDstBLD}}, \code{\link{calcDstRF}}, \code{\link{calcDstTrp}}
 \url{https://github.com/DomBennett/treeman/wiki/calc-methods}
 }
-
