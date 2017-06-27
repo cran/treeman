@@ -60,7 +60,7 @@ checkNdlst <- function(ndlst, root) {
     # spns must be 0 or more
     test_spn <- is.numeric(nd[['spn']]) && nd[['spn']] >= 0
     # test self-reference
-    test_sr <- !nd[['prid']] %in% nd['ptid']
+    test_sr <- !nd[['prid']] %in% nd[['ptid']]
     # test root is never a ptid, proxy for circularity
     test_circ <- !rid %in% nd[['ptid']]
     # only root is self-referential
@@ -75,13 +75,28 @@ checkNdlst <- function(ndlst, root) {
     FALSE
   }
   nds <- names(ndlst)
+  if(any(duplicated(nds))) {
+    dups <- nds[duplicated(nds)]
+    dups <- unique(dups)
+    msg <- 'These node IDs are duplicated:\n'
+    if(length(dups) > 1) {
+      for(i in 1:length(dups) - 1) {
+        msg <- paste0(msg, dups[i], ', ')
+      }
+    }
+    msg <- paste0(msg, dups[length(dups)], '\n')
+    cat(msg)
+    return(FALSE)
+  }
   rid <- root
   nd_checks <- sapply(ndlst, .check)
   if(!all(nd_checks)) {
     msg <- 'These nodes are invalid:\n'
     bad <- which(!nd_checks)
-    for(i in bad[-length(bad)]) {
-      msg <- paste0(msg, nds[i], ', ')
+    if(length(bad) > 1) {
+      for(i in bad[-length(bad)]) {
+        msg <- paste0(msg, nds[i], ', ')
+      }
     }
     msg <- paste0(msg, nds[bad[length(bad)]], '\n')
     cat(msg, '\n')
