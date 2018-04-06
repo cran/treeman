@@ -1,8 +1,7 @@
 Package: treeman
 Type: Package
 Title: Phylogenetic Tree Manipulation Class and Methods
-Version: 1.1.1
-Date: 2017-05-27
+Version: 1.1.2
 Author: D.J. Bennett
 Maintainer: D.J. Bennett <dominic.john.bennett@gmail.com>
 Description: S4 class and methods for intuitive and efficient phylogenetic tree manipulation.
@@ -19,6 +18,6 @@ Collate: 'calc-methods.R' 'check_methods.R' 'cnvrt-methods.R'
         'treemen-declaration.R' 'update-methods.R' 'viz-methods.R'
         'zzz.R'
 NeedsCompilation: yes
-Packaged: 2017-06-27 00:36:39 UTC; dom
+Packaged: 2018-04-06 12:08:43 UTC; dom
 Repository: CRAN
-Date/Publication: 2017-06-27 08:26:47 UTC
+Date/Publication: 2018-04-06 12:36:57 UTC
