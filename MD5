@@ -1,18 +1,18 @@
-748a8974960e5d19a416e8bcfd3df308 *DESCRIPTION
-81a0e7248edb7fe80a34ba8632134899 *NAMESPACE
-24a81964dfe5b754a980c34af7dab63e *R/calc-methods.R
+7cc7b0d4cb306ba7568851ab9f5ce62e *DESCRIPTION
+2938b353dceeb4e47b5ad1dc488923e2 *NAMESPACE
+176889ce3aac4758ad57630f902e2da5 *R/calc-methods.R
 a8137906cdd68fa915ed71a886484e35 *R/check_methods.R
 8310c9ae52d501f2c231995c042f232e *R/cnvrt-methods.R
 e4ceb21b4909a187bd360f399276a2e2 *R/gen-methods.R
 933e293d231176cfaa4f5dbe6469faa9 *R/get-nd-methods.R
 530b89e78266540bb95640d4380c3bd1 *R/get-nds-methods.R
-899a2c0bd6a3b63748d2142d923adbc5 *R/get-spcl-methods.R
+f826395ac0793e8fb24679264f7067f4 *R/get-spcl-methods.R
 4a11e7fd8da85975e104ff54726df22e *R/manip-methods.R
 ff6d1ecb1e174e87e2831baf69081215 *R/ndlst-methods.R
 41ea4b00971379d53dabba40bf89d0f8 *R/ndmtrx-methods.R
 edaf45aeaedea7bbff34a91f423d6b78 *R/node-declaration.R
 ac58d98c1ccf1342d840b61c2305c3b3 *R/read-write-methods.R
-1d5981464918d1cdd5ce7a1059770af3 *R/server-methods.R
+2759fa27b6ade02c3eb4e74e0e32a746 *R/server-methods.R
 3fc4c1725cea66d358d2515acd62c11f *R/set-methods.R
 f932c8533be9dde93025c9dffa206a3a *R/treeman-declaration.R
 ba57faba9f62334261a97f91637b0e76 *R/treemen-declaration.R
@@ -36,7 +36,7 @@ aa08ea640e28f6afa0070e0c81721b6d *man/addTip.Rd
 360b7dfa8ecc0dd0849434b65fa102d9 *man/cTrees.Rd
 e923b903acf4cffe94118b0bb7f8ac02 *man/calcDstBLD.Rd
 3e958f7ba3c0240dac31909039e7dc93 *man/calcDstMtrx.Rd
-efb30e5754b549a9f436d5d7ab3cfe0b *man/calcDstRF.Rd
+43da605f91715363da9caaef536b6e05 *man/calcDstRF.Rd
 bbafd68aa8bf3070ad3197e24d6f0163 *man/calcDstTrp.Rd
 92e7a12b814b31f8e13d9cbaff540657 *man/calcFrPrp.Rd
 7a4691b8e6b3377f079d48b327c19c6d *man/calcNdBlnc.Rd
@@ -48,6 +48,7 @@ bbafd68aa8bf3070ad3197e24d6f0163 *man/calcDstTrp.Rd
 d623b3f5ffb00b85b06585b92354e96e *man/checkTreeMen.Rd
 3e358c280a57e36aa0067c66b54f7b56 *man/fastCheckTreeMan.Rd
 8e62e4ac42159fb7299ed529e1a30dbd *man/getAge.Rd
+14a019b3dc858b499f234658c8af5aec *man/getBiprts.Rd
 28e8243b9337f0a544589d5d5b640081 *man/getCnnctdNds.Rd
 d55e149cacc89045c509f1552cb0103e *man/getDcsd.Rd
 82c0285b3fffd618b40620d4386b084e *man/getLvng.Rd
@@ -97,7 +98,7 @@ d1bc0304f28bfd74404d2d87a564278a *man/rmNodes.Rd
 bd2f55bf12828e6543caa8b18a869874 *man/rmOtherSlt.Rd
 a6ca3800c96cbbcb3a56b7ddc57f34d8 *man/rmTips.Rd
 11ff00a541a888f9cac44bd4c84f4409 *man/saveTreeMan.Rd
-98949a47721f9db04c35abcee3e4ed5c *man/searchTxnyms.Rd
+69ca98f08d32587c971c28b8183dad03 *man/searchTxnyms.Rd
 f4df3e771aba4a8881b4ac9a8c3cb3a8 *man/setAge.Rd
 a953becf2d81f1d91d44dac660d51f7b *man/setNdID.Rd
 154fb7e09b676e4139591e22537d9434 *man/setNdOther.Rd
@@ -107,7 +108,7 @@ a953becf2d81f1d91d44dac660d51f7b *man/setNdID.Rd
 f47054b2f4e310eb10859eacd7f50a03 *man/setNdsSpn.Rd
 31c875fdb0e306d243d1420e71d96a78 *man/setPD.Rd
 85491839a0aa205709d421207f1792cd *man/setTxnyms.Rd
-76a37842e2b4f39d97ad5fcd9dd5ae16 *man/taxaResolve.Rd
+b97fa0602a811085cb7e0755a968d395 *man/taxaResolve.Rd
 4d24e5968ba74c2a4a986218de6abaae *man/treeman-package.Rd
 10a772ce8ef396c4049bbffcdd227909 *man/twoer.Rd
 86da3fed58474436a3a2b7579d18587a *man/ultrTree.Rd
@@ -126,7 +127,7 @@ afadf5ad107a650fa2315f3dc62f7355 *tests/testthat/test-display-methods.R
 ccc55eb1b1f13bb10a7f5900c8d01e9f *tests/testthat/test-gen-methods.R
 b6970dc6561ec2e7bd464a3003e13841 *tests/testthat/test-get-nd-methods.R
 8ad0a5970cd7216a939eafb3c760dc19 *tests/testthat/test-get-nds-methods.R
-728c1b6eabd8c6aa6262229b27d31258 *tests/testthat/test-get-spcl-methods.R
+a50563b607075b8be81c85147c4fae00 *tests/testthat/test-get-spcl-methods.R
 bfaf676bd79c7753a06e596d9d1b1d8b *tests/testthat/test-manip-methods.R
 0c2f328e3e366ac41bc6872234538a72 *tests/testthat/test-ndlst-methods.R
 ebd0e35b1ec4400b6d5eb12cb608509e *tests/testthat/test-ndmtrx-methods.R
@@ -136,4 +137,4 @@ fa3ddee62e5023595e072603bab9dccc *tests/testthat/test-node.R
 a602fead66e3ed01497f43a8a1e7b3d2 *tests/testthat/test-treeman.R
 acda92b2ae365df1278f0feae87f137f *tests/testthat/test-treemen.R
 572cf0e7b54fc019cb07ba49fd1d2eee *tests/testthat/test-update-methods.R
-e0ab22fd8e1cea12d85764d034f5ba9f *tests/testthat/test_server_methods.R
+8c26a6e99597331d4281f64d449fe6ea *tests/testthat/test_server_methods.R
